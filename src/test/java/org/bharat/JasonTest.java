@@ -1,10 +1,14 @@
 package org.bharat;
 
+import org.bharat.jsonObjs.JsonArray;
 import org.bharat.jsonObjs.JsonStr;
 import org.bharat.jsonObjs.JsonStrNumBool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("While testing Jason for json serialization, ")
@@ -17,8 +21,24 @@ class JasonTest {
     }
 
     @Test
+    @DisplayName("Testing primitive")
+    void testingPrimitives() {
+        // These are not valid on their own but are used in (say) array of numbers
+        assertEquals("1,\n", jason.serialize(1));
+
+        assertEquals("1.29,\n", jason.serialize(1.29));
+
+        assertEquals("true,\n", jason.serialize(true));
+
+        var expected = """
+            "Name",
+            """;
+        assertEquals(expected, jason.serialize("Name"));
+    }
+
+    @Test
     @DisplayName("Testing simple strings")
-    void simpleStrings() {
+    void testingSimpleStrings() {
         JsonStr obj = new JsonStr("bharat", "maheshwari");
 
         final var actualJson = jason.serialize(obj);
@@ -35,7 +55,7 @@ class JasonTest {
 
     @Test
     @DisplayName("Testing strings, numbers and booleans")
-    void strNumsBooleans() {
+    void testingStrNumsBooleans() {
         JsonStrNumBool obj = new JsonStrNumBool("bharat maheshwari", 19, 100.29, false);
 
         final var actualJson = jason.serialize(obj);
@@ -46,6 +66,27 @@ class JasonTest {
                 \t"age": 19,
                 \t"price": 100.29,
                 \t"isValid": false,
+                }
+                """;
+
+        assertEquals(expectedJson, actualJson);
+    }
+    @Test
+    @DisplayName("Testing arrays")
+    void testingArrays() {
+        JsonArray obj = new JsonArray(
+                List.of(1, 1.45, "Name")
+        );
+
+        final var actualJson = jason.serialize(obj);
+
+        final var expectedJson = """
+                {
+                \t"arr": [
+                \t\t1,
+                \t\t1.45,
+                \t\t"Name",
+                \t],
                 }
                 """;
 

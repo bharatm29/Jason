@@ -3,34 +3,42 @@ package org.bharat;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
 public class Jason {
-    private StringBuilder json;
-
     private final boolean isRecord;
     private Object currObj;
 
     public Jason() {
         this.isRecord = true;
-        this.json = new StringBuilder("{\n");
     }
 
     public Jason(final boolean isRecord) {
         this.isRecord = isRecord;
-        this.json = new StringBuilder("{\n");
+    }
+
+    public String serialize(Object obj) {
+        return this.serialize(obj, 0);
     }
 
     /**
      * <p>Serializes object into json
      * </p>
+     *
      * @param obj Object to serialize
      * @return Serialized json
      * @since 1.0
      */
-    public String serialize(Object obj) {
+    public String serialize(Object obj, final int depth) {
         this.currObj = obj;
 
+        StringBuilder json = new StringBuilder("{\n");
         var objClass = obj.getClass();
+
+        if (this.isPrimitive(objClass)) {
+            return objClass == String.class ? String.format("\"%s\",\n", obj) : obj + ",\n";
+        }
+
         final var methods = objClass.getDeclaredMethods();
 
         for (final Field field : objClass.getDeclaredFields()) {
@@ -46,11 +54,13 @@ public class Jason {
             }
 
             if (field.getType() == String.class) {
-                serializeString(fieldName, getterOpt.get());
+                serializeString(fieldName, getterOpt.get(), json);
             } else if (field.getType() == Integer.class || field.getType() == Double.class) {
-                serializeNumber(fieldName, getterOpt.get());
+                serializeNumber(fieldName, getterOpt.get(), json);
             } else if (field.getType() == Boolean.class) {
-                serializeBoolean(fieldName, getterOpt.get());
+                serializeBoolean(fieldName, getterOpt.get(), json);
+            } else if (field.getType() == List.class) {
+                json.append(serializedArray(fieldName, getterOpt.get(), depth + 1));
             }
         }
 
@@ -64,7 +74,7 @@ public class Jason {
         return jsonStr;
     }
 
-    private void serializeString(final String fieldName, final Method getter) {
+    private void serializeString(final String fieldName, final Method getter, StringBuilder json) {
         try {
             var fieldVal = getter.invoke(currObj);
 
@@ -77,7 +87,7 @@ public class Jason {
         }
     }
 
-    private void serializeNumber(final String fieldName, final Method getter) {
+    private void serializeNumber(final String fieldName, final Method getter, StringBuilder json) {
         try {
             var fieldVal = getter.invoke(currObj);
 
@@ -92,7 +102,7 @@ public class Jason {
         }
     }
 
-    private void serializeBoolean(final String fieldName, final Method getter) {
+    private void serializeBoolean(final String fieldName, final Method getter, StringBuilder json) {
         try {
             var fieldVal = getter.invoke(currObj);
 
@@ -105,6 +115,27 @@ public class Jason {
         }
     }
 
+    private String serializedArray(final String fieldName, final Method getter, final int depth) {
+        final String indent = "\t".repeat(Math.max(0, depth));
+        StringBuilder json = new StringBuilder(String.format("""
+                %s"%s": [
+                """, indent, fieldName));
+
+        try {
+            var fieldVal = (List<Object>) getter.invoke(currObj);
+
+            fieldVal.forEach(obj -> {
+                json.append("\t".repeat(Math.max(0, depth + 1)));
+
+                json.append(this.serialize(obj));
+            });
+        } catch (Exception _) {
+        }
+
+        json.append(indent).append("],\n");
+        return json.toString();
+    }
+
     private String getterName(final String fieldName) {
         if (this.isRecord) {
             return fieldName;
@@ -112,5 +143,9 @@ public class Jason {
 
         return "get" + Character.toUpperCase(fieldName.charAt(0)) +
                 fieldName.substring(1);
+    }
+
+    private boolean isPrimitive(Class<?> c) {
+        return c == Integer.class || c == Double.class || c == Float.class || c == String.class || c == Boolean.class;
     }
 }
