@@ -17,15 +17,16 @@ class JasonTest {
     @Test
     @DisplayName("Testing simple strings")
     void simpleStrings() {
-        final var actualJson = jason.
-                addString("first_name", "Bharat").
-                addString("last_name", "Maheshwari").
-                serialize();
+        Jason<JsonObj> jason = new Jason<>();
+
+        JsonObj obj = new JsonObj("bharat", "maheshwari", 19);
+
+        final var actualJson = jason.serialize(JsonObj.class, obj);
 
         final var expectedJson = """
                 {
-                \t"first_name": "Bharat",
-                \t"last_name": "Maheshwari",
+                \t"firstname": "bharat",
+                \t"lastname": "maheshwari",
                 }
                 """;
 
