@@ -26,6 +26,7 @@ public class Jason {
      * </p>
      *
      * @param obj Object to serialize
+     * @param depth indent depth
      * @return Serialized json
      * @since 1.0
      */
@@ -53,6 +54,7 @@ public class Jason {
                 continue;
             }
 
+            // FIXME: Handle null values for fields in everycase
             if (field.getType() == String.class) {
                 serializeString(fieldName, getterOpt.get(), json);
             } else if (field.getType() == Integer.class || field.getType() == Double.class) {
@@ -66,12 +68,7 @@ public class Jason {
 
         json.append("}\n");
 
-        final String jsonStr = json.toString();
-
-        // reset for next use
-        json = new StringBuilder("{\n");
-
-        return jsonStr;
+        return json.toString();
     }
 
     private void serializeString(final String fieldName, final Method getter, StringBuilder json) {
@@ -127,7 +124,7 @@ public class Jason {
             fieldVal.forEach(obj -> {
                 json.append("\t".repeat(Math.max(0, depth + 1)));
 
-                json.append(this.serialize(obj));
+                json.append(this.serialize(obj, depth + 1));
             });
         } catch (Exception _) {
         }

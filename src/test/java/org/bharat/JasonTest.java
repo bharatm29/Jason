@@ -71,9 +71,32 @@ class JasonTest {
 
         assertEquals(expectedJson, actualJson);
     }
+
     @Test
-    @DisplayName("Testing arrays")
+    @DisplayName("Testing primitive arrays")
     void testingArrays() {
+        JsonArray obj = new JsonArray(
+                List.of(1, 1.45, "Name")
+        );
+
+        final var actualJson = jason.serialize(obj);
+
+        final var expectedJson = """
+                {
+                \t"arr": [
+                \t\t1,
+                \t\t1.45,
+                \t\t"Name",
+                \t],
+                }
+                """;
+
+        assertEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    @DisplayName("Testing object arrays")
+    void testingObjectArrays() {
         JsonArray obj = new JsonArray(
                 List.of(1, 1.45, "Name")
         );
