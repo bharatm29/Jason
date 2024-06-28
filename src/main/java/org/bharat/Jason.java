@@ -39,7 +39,9 @@ public class Jason {
         StringBuilder json = new StringBuilder();
 
         json.append("\t".repeat(Math.max(0, depth)));
-        json.append(optionalObjName);
+        if (!optionalObjName.isEmpty()) {
+            json.append(String.format("\"%s\": ", optionalObjName));
+        }
         json.append("{\n");
 
         var objClass = obj.getClass();
@@ -75,28 +77,31 @@ public class Jason {
                     continue;
                 }
 
-                if (fieldVal instanceof List<?> val) {
-                    json.append(serializedArray(fieldName, val, depth + 1));
-                } else {
+                if (isPrimitive(fieldVal.getClass())) {
                     final String indent = "\t".repeat(Math.max(0, depth + 1));
                     String formatter = """
-                        %s"%s": %s,
-                        """;
+                            %s"%s": %s,
+                            """;
 
                     if (fieldVal instanceof String) {
                         formatter = """
-                            %s"%s": "%s",
-                            """;
+                                %s"%s": "%s",
+                                """;
                     }
 
                     final String formatted = String.format(formatter, indent, fieldName, fieldVal);
 
                     json.append(formatted);
+                } else if (fieldVal instanceof List<?> val) {
+                    json.append(serializedArray(fieldName, val, depth + 1));
+                } else {
+                    json.append(serialize(fieldVal, depth + 1, fieldName));
                 }
             } catch (Exception _) {
             }
         }
 
+        json.append("\t".repeat(depth));
         json.append("}\n");
 
         return json.toString();
