@@ -1,9 +1,6 @@
 package org.bharat;
 
-import org.bharat.jsonObjs.JsonArray;
-import org.bharat.jsonObjs.JsonObj;
-import org.bharat.jsonObjs.JsonStr;
-import org.bharat.jsonObjs.JsonStrNumBool;
+import org.bharat.jsonObjs.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -124,15 +121,35 @@ class JasonTest {
 
         JsonObj obj = new JsonObj("name", strobj);
 
-        final var actualJson = jason.serialize(obj);
+        var actualJson = jason.serialize(obj);
 
-        final var expectedJson = """
+        var expectedJson = """
                 {
                 \t"name": "name",
                 \t"nested": {
                 \t\t"firstname": "bharat",
                 \t\t"lastname": "maheshwari",
-                \t}
+                \t},
+                }
+                """;
+
+        assertEquals(expectedJson, actualJson);
+
+        // nested arrays
+        JsonArray arr = new JsonArray(List.of("name", 1, strobj));
+
+        actualJson = jason.serialize(arr);
+
+        expectedJson = """
+                {
+                \t"arr": [
+                \t\t"name",
+                \t\t1,
+                \t\t{
+                \t\t\t"firstname": "bharat",
+                \t\t\t"lastname": "maheshwari",
+                \t\t},
+                \t],
                 }
                 """;
 

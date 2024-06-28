@@ -1,24 +1,22 @@
 package org.bharat;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 public class Jason {
-    private final boolean isRecord;
-    private Object currObj;
+    private boolean isRecord;
 
     public Jason() {
         this.isRecord = true;
     }
 
-    public Jason(final boolean isRecord) {
-        this.isRecord = isRecord;
+    public String serialize(Object obj) {
+        return this.serialize(obj, 0, "");
     }
 
-    public String serialize(Object obj) {
+    public String serialize(Object obj, final boolean isRecord) {
+        this.isRecord = isRecord;
         return this.serialize(obj, 0, "");
     }
 
@@ -34,7 +32,6 @@ public class Jason {
      */
     public String serialize(Object obj, final int depth, String optionalObjName) {
         assert optionalObjName != null;
-        this.currObj = obj;
 
         StringBuilder json = new StringBuilder();
 
@@ -47,8 +44,7 @@ public class Jason {
         var objClass = obj.getClass();
 
         if (this.isPrimitive(objClass)) {
-            // FIXME: Maybe remove indent concatenation frmo serializeArray and handle here?
-            final String indent = "\t".repeat(Math.max(0, 0));
+            final String indent = "\t".repeat(Math.max(0, depth));
             if (obj instanceof String) {
                 return String.format("%s\"%s\",\n", indent, obj);
             }
@@ -72,7 +68,7 @@ public class Jason {
 
             // FIXME: Handle null values for fields in every case
             try {
-                var fieldVal = getterOpt.get().invoke(currObj);
+                var fieldVal = getterOpt.get().invoke(obj);
                 if (fieldVal == null) {
                     continue;
                 }
@@ -101,8 +97,11 @@ public class Jason {
             }
         }
 
-        json.append("\t".repeat(depth));
-        json.append("}\n");
+        json.append("\t".repeat(depth)).append("}");
+        if (depth > 0) {
+            json.append(",");
+        }
+        json.append("\n");
 
         return json.toString();
     }
@@ -114,8 +113,6 @@ public class Jason {
                 """, indent, fieldName));
 
         fieldVal.forEach(obj -> {
-            json.append("\t".repeat(Math.max(0, depth + 1)));
-
             json.append(this.serialize(obj, depth + 1, ""));
         });
 
