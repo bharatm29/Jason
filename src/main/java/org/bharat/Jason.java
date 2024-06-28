@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class Jason {
     private final boolean isRecord;
@@ -18,26 +19,39 @@ public class Jason {
     }
 
     public String serialize(Object obj) {
-        return this.serialize(obj, 0);
+        return this.serialize(obj, 0, "");
     }
 
     /**
      * <p>Serializes object into json
      * </p>
      *
-     * @param obj Object to serialize
-     * @param depth indent depth
+     * @param obj             Object to serialize
+     * @param depth           indent depth
+     * @param optionalObjName Object names in case of nested object. Pass empty string("") not null.
      * @return Serialized json
      * @since 1.0
      */
-    public String serialize(Object obj, final int depth) {
+    public String serialize(Object obj, final int depth, String optionalObjName) {
+        assert optionalObjName != null;
         this.currObj = obj;
 
-        StringBuilder json = new StringBuilder("{\n");
+        StringBuilder json = new StringBuilder();
+
+        json.append("\t".repeat(Math.max(0, depth)));
+        json.append(optionalObjName);
+        json.append("{\n");
+
         var objClass = obj.getClass();
 
         if (this.isPrimitive(objClass)) {
-            return objClass == String.class ? String.format("\"%s\",\n", obj) : obj + ",\n";
+            // FIXME: Maybe remove indent concatenation frmo serializeArray and handle here?
+            final String indent = "\t".repeat(Math.max(0, 0));
+            if (obj instanceof String) {
+                return String.format("%s\"%s\",\n", indent, obj);
+            }
+
+            return indent + obj + ",\n";
         }
 
         final var methods = objClass.getDeclaredMethods();
@@ -54,15 +68,32 @@ public class Jason {
                 continue;
             }
 
-            // FIXME: Handle null values for fields in everycase
-            if (field.getType() == String.class) {
-                serializeString(fieldName, getterOpt.get(), json);
-            } else if (field.getType() == Integer.class || field.getType() == Double.class) {
-                serializeNumber(fieldName, getterOpt.get(), json);
-            } else if (field.getType() == Boolean.class) {
-                serializeBoolean(fieldName, getterOpt.get(), json);
-            } else if (field.getType() == List.class) {
-                json.append(serializedArray(fieldName, getterOpt.get(), depth + 1));
+            // FIXME: Handle null values for fields in every case
+            try {
+                var fieldVal = getterOpt.get().invoke(currObj);
+                if (fieldVal == null) {
+                    continue;
+                }
+
+                if (fieldVal instanceof List<?> val) {
+                    json.append(serializedArray(fieldName, val, depth + 1));
+                } else {
+                    final String indent = "\t".repeat(Math.max(0, depth + 1));
+                    String formatter = """
+                        %s"%s": %s,
+                        """;
+
+                    if (fieldVal instanceof String) {
+                        formatter = """
+                            %s"%s": "%s",
+                            """;
+                    }
+
+                    final String formatted = String.format(formatter, indent, fieldName, fieldVal);
+
+                    json.append(formatted);
+                }
+            } catch (Exception _) {
             }
         }
 
@@ -71,63 +102,17 @@ public class Jason {
         return json.toString();
     }
 
-    private void serializeString(final String fieldName, final Method getter, StringBuilder json) {
-        try {
-            var fieldVal = getter.invoke(currObj);
-
-            final String formatted = String.format("""
-                    \t"%s": "%s",
-                    """, fieldName, fieldVal);
-
-            json.append(formatted);
-        } catch (Exception _) {
-        }
-    }
-
-    private void serializeNumber(final String fieldName, final Method getter, StringBuilder json) {
-        try {
-            var fieldVal = getter.invoke(currObj);
-
-            String numberStr = fieldVal.toString();
-
-            final String formatted = String.format("""
-                    \t"%s": %s,
-                    """, fieldName, numberStr);
-
-            json.append(formatted);
-        } catch (Exception _) {
-        }
-    }
-
-    private void serializeBoolean(final String fieldName, final Method getter, StringBuilder json) {
-        try {
-            var fieldVal = getter.invoke(currObj);
-
-            final String formatted = String.format("""
-                    \t"%s": %s,
-                    """, fieldName, fieldVal);
-
-            json.append(formatted);
-        } catch (Exception _) {
-        }
-    }
-
-    private String serializedArray(final String fieldName, final Method getter, final int depth) {
+    private String serializedArray(final String fieldName, final List<?> fieldVal, final int depth) {
         final String indent = "\t".repeat(Math.max(0, depth));
         StringBuilder json = new StringBuilder(String.format("""
                 %s"%s": [
                 """, indent, fieldName));
 
-        try {
-            var fieldVal = (List<Object>) getter.invoke(currObj);
+        fieldVal.forEach(obj -> {
+            json.append("\t".repeat(Math.max(0, depth + 1)));
 
-            fieldVal.forEach(obj -> {
-                json.append("\t".repeat(Math.max(0, depth + 1)));
-
-                json.append(this.serialize(obj, depth + 1));
-            });
-        } catch (Exception _) {
-        }
+            json.append(this.serialize(obj, depth + 1, ""));
+        });
 
         json.append(indent).append("],\n");
         return json.toString();
