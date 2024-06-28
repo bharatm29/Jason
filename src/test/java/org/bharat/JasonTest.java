@@ -22,14 +22,14 @@ class JasonTest {
     @DisplayName("Testing primitive")
     void testingPrimitives() {
         // These are not valid on their own but are used in (say) array of numbers
-        assertEquals("1,\n", jason.serialize(1));
+        assertEquals("1\n", jason.serialize(1));
 
-        assertEquals("1.29,\n", jason.serialize(1.29));
+        assertEquals("1.29\n", jason.serialize(1.29));
 
-        assertEquals("true,\n", jason.serialize(true));
+        assertEquals("true\n", jason.serialize(true));
 
         var expected = """
-            "Name",
+            "Name"
             """;
         assertEquals(expected, jason.serialize("Name"));
     }
@@ -44,7 +44,7 @@ class JasonTest {
         final var expectedJson = """
                 {
                 \t"firstname": "bharat",
-                \t"lastname": "maheshwari",
+                \t"lastname": "maheshwari"
                 }
                 """;
 
@@ -63,7 +63,7 @@ class JasonTest {
                 \t"name": "bharat maheshwari",
                 \t"age": 19,
                 \t"price": 100.29,
-                \t"isValid": false,
+                \t"isValid": false
                 }
                 """;
 
@@ -84,8 +84,8 @@ class JasonTest {
                 \t"arr": [
                 \t\t1,
                 \t\t1.45,
-                \t\t"Name",
-                \t],
+                \t\t"Name"
+                \t]
                 }
                 """;
 
@@ -106,8 +106,8 @@ class JasonTest {
                 \t"arr": [
                 \t\t1,
                 \t\t1.45,
-                \t\t"Name",
-                \t],
+                \t\t"Name"
+                \t]
                 }
                 """;
 
@@ -128,15 +128,15 @@ class JasonTest {
                 \t"name": "name",
                 \t"nested": {
                 \t\t"firstname": "bharat",
-                \t\t"lastname": "maheshwari",
-                \t},
+                \t\t"lastname": "maheshwari"
+                \t}
                 }
                 """;
 
         assertEquals(expectedJson, actualJson);
 
         // nested arrays
-        JsonArray arr = new JsonArray(List.of("name", 1, strobj));
+        JsonArray arr = new JsonArray(List.of("name", strobj, 1));
 
         actualJson = jason.serialize(arr);
 
@@ -144,12 +144,12 @@ class JasonTest {
                 {
                 \t"arr": [
                 \t\t"name",
-                \t\t1,
                 \t\t{
                 \t\t\t"firstname": "bharat",
-                \t\t\t"lastname": "maheshwari",
+                \t\t\t"lastname": "maheshwari"
                 \t\t},
-                \t],
+                \t\t1
+                \t]
                 }
                 """;
 

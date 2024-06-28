@@ -45,16 +45,19 @@ public class Jason {
 
         if (this.isPrimitive(objClass)) {
             final String indent = "\t".repeat(Math.max(0, depth));
+            final String newline = depth > 0 ? "" : "\n";
             if (obj instanceof String) {
-                return String.format("%s\"%s\",\n", indent, obj);
+                return String.format("%s\"%s\"%s", indent, obj, newline);
             }
 
-            return indent + obj + ",\n";
+            return indent + obj + newline;
         }
 
         final var methods = objClass.getDeclaredMethods();
+        final var fields = objClass.getDeclaredFields();
 
-        for (final Field field : objClass.getDeclaredFields()) {
+        for (int i = 0; i < fields.length; i++) {
+            final Field field = fields[i];
             var fieldName = field.getName();
             var getterOpt = Arrays.stream(methods)
                     .filter(method ->
@@ -73,50 +76,53 @@ public class Jason {
                     continue;
                 }
 
+                final String comma = (i + 1 == fields.length) ? "" : ",";
+
                 if (isPrimitive(fieldVal.getClass())) {
                     final String indent = "\t".repeat(Math.max(0, depth + 1));
                     String formatter = """
-                            %s"%s": %s,
+                            %s"%s": %s%s
                             """;
 
                     if (fieldVal instanceof String) {
                         formatter = """
-                                %s"%s": "%s",
+                                %s"%s": "%s"%s
                                 """;
                     }
 
-                    final String formatted = String.format(formatter, indent, fieldName, fieldVal);
+                    final String formatted = String.format(formatter, indent, fieldName, fieldVal, comma);
 
                     json.append(formatted);
                 } else if (fieldVal instanceof List<?> val) {
-                    json.append(serializedArray(fieldName, val, depth + 1));
+                    json.append(serializedArray(fieldName, val, depth + 1, comma));
                 } else {
-                    json.append(serialize(fieldVal, depth + 1, fieldName));
+                    json.append(serialize(fieldVal, depth + 1, fieldName)).append(comma).append("\n");
                 }
             } catch (Exception _) {
             }
         }
 
         json.append("\t".repeat(depth)).append("}");
-        if (depth > 0) {
-            json.append(",");
+        if (depth == 0) {
+            json.append("\n");
         }
-        json.append("\n");
 
         return json.toString();
     }
 
-    private String serializedArray(final String fieldName, final List<?> fieldVal, final int depth) {
+    private String serializedArray(final String fieldName, final List<?> fieldVal, final int depth, final String comma) {
         final String indent = "\t".repeat(Math.max(0, depth));
         StringBuilder json = new StringBuilder(String.format("""
                 %s"%s": [
                 """, indent, fieldName));
 
         fieldVal.forEach(obj -> {
-            json.append(this.serialize(obj, depth + 1, ""));
+            final String afterComma = obj == fieldVal.getLast() ? "" : ",";
+            json.append(this.serialize(obj, depth + 1, ""))
+                    .append(afterComma).append("\n");
         });
 
-        json.append(indent).append("],\n");
+        json.append(indent).append("]").append(comma).append("\n");
         return json.toString();
     }
 
