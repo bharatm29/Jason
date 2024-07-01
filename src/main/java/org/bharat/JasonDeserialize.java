@@ -1,9 +1,7 @@
 package org.bharat;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class JasonDeserialize<T> {
     private char curChar;
@@ -14,7 +12,7 @@ public class JasonDeserialize<T> {
         this.json = json;
         this.curChar = json.charAt(pos);
 
-        return (T) deserialize(tClass);
+        return tClass.cast(deserialize(tClass));
     }
 
     public Object deserialize(Class<?> tClass) {
@@ -34,10 +32,14 @@ public class JasonDeserialize<T> {
 
                     if (this.curChar == '}') {
                         this.nextChar();
+
+                        if (this.curChar == ',') {
+                            this.nextChar();
+                        }
+
                         break;
                     }
 
-                    this.nextChar(); // skip the double quote
                     final String key = parseKey();
 
                     final var field = Arrays.stream(fields)
@@ -58,7 +60,6 @@ public class JasonDeserialize<T> {
                 }
             }
             case '"' -> {
-                this.nextChar(); // skip the quote FIXME: handle skipping it in parseKey() itself
                 return parseKey();
             }
             case '[' -> {
@@ -69,6 +70,7 @@ public class JasonDeserialize<T> {
             }
         }
 
+        // FIXME: Handle constructor for class intances
         if (tClass.isRecord()) {
             // if it's a record there will only be a single all args contructor
             final var constructor = Arrays.stream(tClass.getDeclaredConstructors()).findFirst().get();
@@ -83,12 +85,16 @@ public class JasonDeserialize<T> {
             } catch (Exception e) {
                 System.out.println("Error creating new instance of record: " + e.getMessage());
             }
+        } else {
+            throw new RuntimeException("Class objects not handled");
         }
 
         return null;
     }
 
     private String parseKey() {
+        this.nextChar(); // skip the double quote
+
         final int startPos = this.pos;
 
         while (this.curChar != '"') {
@@ -111,8 +117,6 @@ public class JasonDeserialize<T> {
     }
 
     private Object parseArray(Class<?> aClass) {
-        System.out.println(aClass);
-
         this.nextChar(); // skip the [
 
         List<Object> items = new ArrayList<>();

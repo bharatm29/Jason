@@ -1,7 +1,7 @@
 package org.bharat;
 
-import org.bharat.jsonObjs.JsonArray;
 import org.bharat.jsonObjs.JsonDeezArray;
+import org.bharat.jsonObjs.JsonDeezObjArray;
 import org.bharat.jsonObjs.JsonStr;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,37 @@ class JasonDeserializeTest {
 
         final JsonDeezArray actual = deserialize.deserialize(json, JsonDeezArray.class);
 
-        final JsonDeezArray expected = new JsonDeezArray (List.of("name1", "name2"));
+        final JsonDeezArray expected = new JsonDeezArray(List.of("name1", "name2"));
+
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("Testing object array deserialization")
+    void testingObjectArrayDeserialization() {
+        final String json = """
+                {
+                \t"arr": [
+                \t\t{
+                \t\t\t"firstname": "name1",
+                \t\t\t"lastname": "name2"
+                \t\t},
+                \t\t{
+                \t\t\t"firstname": "name3",
+                \t\t\t"lastname": "name4"
+                \t\t}
+                \t]
+                }
+                """;
+
+        JasonDeserialize<JsonDeezObjArray> deserialize = new JasonDeserialize<>();
+
+        final JsonDeezObjArray actual = deserialize.deserialize(json, JsonDeezObjArray.class);
+
+        final JsonDeezObjArray expected = new JsonDeezObjArray(List.of(
+                new JsonStr("name1", "name2"),
+                new JsonStr("name3", "name4")
+                ));
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
