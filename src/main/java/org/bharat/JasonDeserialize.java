@@ -12,7 +12,14 @@ public class JasonDeserialize<T> {
         this.json = json;
         this.curChar = json.charAt(pos);
 
-        return tClass.cast(deserialize(tClass));
+        final var obj = deserialize(tClass);
+
+        if (obj == null) {
+            // FIXME: Display all the errors and maybe return Optonal<T> from this
+            System.out.println("Some errors happened");
+        }
+
+        return tClass.cast(obj);
     }
 
     public Object deserialize(Class<?> tClass) {
@@ -42,10 +49,16 @@ public class JasonDeserialize<T> {
 
                     final String key = parseKey();
 
-                    final var field = Arrays.stream(fields)
+                    final var fieldOpt = Arrays.stream(fields)
                             .filter(f -> f.getName().equals(key))
-                            .findFirst()
-                            .get(); // FIXME: Handle absence of field with that name here
+                            .findFirst();
+
+                    if (fieldOpt.isEmpty()) {
+                        // FIXME: Make a custom exception for better clarity of errors
+                        throw new RuntimeException(String.format("No field named %s in %s%n", key, tClass));
+                    }
+
+                    final var field = fieldOpt.get();
 
                     final Class<?> objClass = field.getType();
 
@@ -74,6 +87,11 @@ public class JasonDeserialize<T> {
         if (tClass.isRecord()) {
             // if it's a record there will only be a single all args contructor
             final var constructor = Arrays.stream(tClass.getDeclaredConstructors()).findFirst().get();
+
+            if (constructor.getParameterCount() > obj.size()) {
+                throw new RuntimeException(String.format("Not enough fields to create the object. " +
+                        "Number of required fields: %d, got %d%n", constructor.getParameterCount(), obj.size()));
+            }
 
             final var argsList = Arrays.stream(constructor.getParameters())
                     .map(parameter -> {

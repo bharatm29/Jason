@@ -1,5 +1,6 @@
 package org.bharat;
 
+import jdk.jshell.spi.ExecutionControl;
 import org.bharat.jsonObjs.JsonDeezArray;
 import org.bharat.jsonObjs.JsonDeezObjArray;
 import org.bharat.jsonObjs.JsonStr;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("While testing JsonDeserialize")
 class JasonDeserializeTest {
@@ -77,8 +79,41 @@ class JasonDeserializeTest {
         final JsonDeezObjArray expected = new JsonDeezObjArray(List.of(
                 new JsonStr("name1", "name2"),
                 new JsonStr("name3", "name4")
-                ));
+        ));
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("Testing if throws error when field with that name doesn't exist")
+    void testingThrowsIfFieldNonExist() {
+        final String json = """
+                {
+                \t"firstnam": "Bharat",
+                \t"lastname": "Maheshwari"
+                }
+                """;
+
+        assertThrows(RuntimeException.class, () -> {
+            JasonDeserialize<JsonStr> deserialize = new JasonDeserialize<>();
+
+            deserialize.deserialize(json, JsonStr.class);
+        });
+    }
+
+    @Test
+    @DisplayName("Testing if throws error when there isn't enough fields to create the object in case of records")
+    void testingThrowsIfNotEnoughFields() {
+        final String json = """
+                {
+                \t"lastname": "Maheshwari"
+                }
+                """;
+
+        assertThrows(RuntimeException.class, () -> {
+            JasonDeserialize<JsonStr> deserialize = new JasonDeserialize<>();
+
+            deserialize.deserialize(json, JsonStr.class);
+        });
     }
 }
