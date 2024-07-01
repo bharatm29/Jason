@@ -85,7 +85,7 @@ public class JasonDeserialize<T> {
         }
 
         // FIXME: Handle constructor for class intances
-        if (tClass.isRecord()) {
+        if (tClass == Object.class || tClass.isRecord()) {
             // if it's a record there will only be a single all args contructor
             final var constructor = Arrays.stream(tClass.getDeclaredConstructors()).findFirst().get();
 
@@ -105,7 +105,7 @@ public class JasonDeserialize<T> {
                 System.out.println("Error creating new instance of record: " + e.getMessage());
             }
         } else {
-            throw new RuntimeException("Class objects not handled");
+            throw new RuntimeException("Class objects not handled: " + tClass);
         }
 
         return null;
