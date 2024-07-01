@@ -1,9 +1,9 @@
 package org.bharat;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class JasonDeserialize<T> {
     private char curChar;
@@ -14,13 +14,14 @@ public class JasonDeserialize<T> {
         this.json = json;
         this.curChar = json.charAt(pos);
 
-        return (T) deserialize(tClass, 0);
+        return (T) deserialize(tClass);
     }
 
-    public Object deserialize(Class<?> tClass, final int depth) {
+    public Object deserialize(Class<?> tClass) {
         Map<String, Object> obj = new HashMap<>();
 
         final var fields = tClass.getDeclaredFields();
+        this.skipTilValidChar();
 
         switch (this.curChar) {
             case '{' -> {
@@ -39,18 +40,32 @@ public class JasonDeserialize<T> {
                     this.nextChar(); // skip the double quote
                     final String key = parseKey();
 
-                    final Class<?> objClass = Arrays.stream(fields).filter(field -> field.getName().equals(key)).findFirst().get() // FIXME: Handle absence of field with that name here
-                            .getType();
+                    final var field = Arrays.stream(fields)
+                            .filter(f -> f.getName().equals(key))
+                            .findFirst()
+                            .get(); // FIXME: Handle absence of field with that name here
 
-                    obj.put(key, deserialize(objClass, depth + 1));
+                    final Class<?> objClass = field.getType();
+
+                    if (objClass.isAssignableFrom(List.class)) {
+                        final var listParameter = (ParameterizedType) field.getGenericType();
+                        final var listGenericClass = (Class<?>) Arrays.stream(listParameter.getActualTypeArguments()).findFirst().get();
+
+                        obj.put(key, deserialize(listGenericClass));
+                    } else { //simple strings and objects
+                        obj.put(key, deserialize(objClass));
+                    }
                 }
             }
             case '"' -> {
                 this.nextChar(); // skip the quote FIXME: handle skipping it in parseKey() itself
                 return parseKey();
             }
+            case '[' -> {
+                return parseArray(tClass);
+            }
             default -> {
-                throw new RuntimeException("Handle default case bro");
+                throw new RuntimeException("Handle default case: " + curChar);
             }
         }
 
@@ -93,6 +108,24 @@ public class JasonDeserialize<T> {
         }
 
         return key;
+    }
+
+    private Object parseArray(Class<?> aClass) {
+        System.out.println(aClass);
+
+        this.nextChar(); // skip the [
+
+        List<Object> items = new ArrayList<>();
+
+        while (this.curChar != ']') {
+            items.add(deserialize(aClass));
+            this.skipTilValidChar();
+        }
+
+        // this.skipTilValidChar();
+        this.nextChar(); // skip the ]
+
+        return items.stream().map(aClass::cast).toList();
     }
 
     private void nextChar() {
