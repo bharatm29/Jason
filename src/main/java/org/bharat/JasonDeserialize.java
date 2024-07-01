@@ -53,9 +53,10 @@ public class JasonDeserialize<T> {
                             .filter(f -> f.getName().equals(key))
                             .findFirst();
 
+                    // if there isn't a field with that name simple parse ahead and skip it
                     if (fieldOpt.isEmpty()) {
-                        // FIXME: Make a custom exception for better clarity of errors
-                        throw new RuntimeException(String.format("No field named %s in %s%n", key, tClass));
+                        deserialize(Object.class);
+                        continue;
                     }
 
                     final var field = fieldOpt.get();

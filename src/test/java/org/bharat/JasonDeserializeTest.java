@@ -85,20 +85,23 @@ class JasonDeserializeTest {
     }
 
     @Test
-    @DisplayName("Testing if throws error when field with that name doesn't exist")
+    @DisplayName("Testing if it ignores when field with that name doesn't exist")
     void testingThrowsIfFieldNonExist() {
         final String json = """
                 {
-                \t"firstnam": "Bharat",
+                \t"firstname": "Bharat",
                 \t"lastname": "Maheshwari"
+                \t"non-existent-field": "non-existent-value"
                 }
                 """;
 
-        assertThrows(RuntimeException.class, () -> {
-            JasonDeserialize<JsonStr> deserialize = new JasonDeserialize<>();
+        JasonDeserialize<JsonStr> deserialize = new JasonDeserialize<>();
 
-            deserialize.deserialize(json, JsonStr.class);
-        });
+        final JsonStr actual = deserialize.deserialize(json, JsonStr.class);
+
+        final JsonStr expected = new JsonStr("Bharat", "Maheshwari");
+
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
 
     @Test

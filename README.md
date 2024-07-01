@@ -6,3 +6,4 @@ JSON serializer and Deserializer written in pure JAVA.
 - [ ] Add Support for class objects in deserializer
 - [ ] Improve error handling
 - [ ] Add Benchmarks
+- [ ] Add tests with big json files for deserializer
