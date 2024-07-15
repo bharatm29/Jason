@@ -15,7 +15,7 @@ public class JasonDeserialize<T> {
         final var obj = deserialize(tClass);
 
         if (obj == null) {
-            // FIXME: Display all the errors and maybe return Optonal<T> from this
+            // FIXME: Display all the errors and maybe return Optional<T> from this
             System.out.println("Some errors happened");
         }
 
