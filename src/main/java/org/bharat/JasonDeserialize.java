@@ -84,9 +84,9 @@ public class JasonDeserialize<T> {
             }
         }
 
-        // FIXME: Handle constructor for class intances
+        // FIXME: Handle constructor for class instances
         if (tClass == Object.class || tClass.isRecord()) {
-            // if it's a record there will only be a single all args contructor
+            // if it's a record there will only be a single all args constructor
             final var constructor = Arrays.stream(tClass.getDeclaredConstructors()).findFirst().get();
 
             if (constructor.getParameterCount() > obj.size()) {
