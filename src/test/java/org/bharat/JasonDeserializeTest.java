@@ -118,4 +118,24 @@ class JasonDeserializeTest {
             deserialize.deserialize(json, JsonStr.class);
         });
     }
+
+
+    @Test
+    @DisplayName("Testing simple deserialization with null values")
+    void testingSimpleNullDeserialization() {
+        final String json = """
+                {
+                \t"firstname": null,
+                \t"lastname": "Maheshwari"
+                }
+                """;
+
+        JasonDeserialize<JsonStr> deserialize = new JasonDeserialize<>();
+
+        final JsonStr actual = deserialize.deserialize(json, JsonStr.class);
+
+        final JsonStr expected = new JsonStr(null, "Maheshwari");
+
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
 }

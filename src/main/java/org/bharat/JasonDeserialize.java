@@ -80,7 +80,11 @@ public class JasonDeserialize<T> {
                 return parseArray(tClass);
             }
             default -> {
-                throw new RuntimeException("Handle default case: " + curChar);
+                if (Character.isDigit(this.curChar)) {
+                    throw new RuntimeException("Handle number case: " + curChar);
+                } else {
+                    return parseNull();
+                }
             }
         }
 
@@ -107,6 +111,21 @@ public class JasonDeserialize<T> {
         } else {
             throw new RuntimeException("Class objects not handled: " + tClass);
         }
+
+        return null;
+    }
+
+    private Object parseNull() {
+        final String NULL_STR = "null";
+
+        for (int i = 0; i < NULL_STR.length(); i++) {
+            if (this.curChar != NULL_STR.charAt(i)) {
+                throw new RuntimeException("Invalid Null string at: " + this.pos + " -> [" + this.curChar + "]");
+            }
+            this.nextChar();
+        }
+
+        this.nextChar(); // skip comma or newline
 
         return null;
     }
