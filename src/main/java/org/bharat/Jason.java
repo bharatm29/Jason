@@ -71,14 +71,16 @@ public class Jason {
 
             // FIXME: Handle null values for fields in every case
             try {
-                var fieldVal = getterOpt.get().invoke(obj);
-                if (fieldVal == null) {
-                    continue;
-                }
-
                 final String comma = (i + 1 == fields.length) ? "" : ",";
 
-                if (isPrimitive(fieldVal.getClass())) {
+                var fieldVal = getterOpt.get().invoke(obj);
+
+                if (fieldVal == null) {
+                    final String indent = "\t".repeat(Math.max(0, depth + 1));
+                    json.append("""
+                            %s"%s": %s%s
+                            """.formatted(indent, fieldName, "null", comma));
+                } else if (isPrimitive(fieldVal.getClass())) {
                     final String indent = "\t".repeat(Math.max(0, depth + 1));
                     String formatter = """
                             %s"%s": %s%s
@@ -98,7 +100,8 @@ public class Jason {
                 } else {
                     json.append(serialize(fieldVal, depth + 1, fieldName)).append(comma).append("\n");
                 }
-            } catch (Exception _) {
+            } catch (Exception e) {
+                System.out.println("Error when serializing field value: " + e.getMessage());
             }
         }
 

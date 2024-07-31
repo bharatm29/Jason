@@ -2,8 +2,8 @@
 JSON serializion engine written in pure JAVA.
 
 #### TODO
-- [ ] Add number support in deserializer
-- [ ] Add support for null in serializer and deserializer
+- [x] Add number support in deserializer
+- [x] Add support for null in serializer and deserializer
 - [ ] Add Support for class objects in deserializer
 - [ ] Improve error handling
 - [ ] Add Benchmarks

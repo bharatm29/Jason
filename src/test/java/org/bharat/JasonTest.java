@@ -155,4 +155,44 @@ class JasonTest {
 
         assertEquals(expectedJson, actualJson);
     }
+
+    @Test
+    @DisplayName("Testing simple strings with null values")
+    void testingSimpleStringsWithNull() {
+        JsonStr obj = new JsonStr("bharat", null);
+
+        final var actualJson = jason.serialize(obj);
+
+        final var expectedJson = """
+                {
+                \t"firstname": "bharat",
+                \t"lastname": null
+                }
+                """;
+
+        assertEquals(expectedJson, actualJson);
+    }
+
+
+    @Test
+    @DisplayName("Testing nested object with null values")
+    void testingNestedObjectsWithNull() {
+        JsonStr strobj = new JsonStr(null, "maheshwari");
+
+        JsonObj obj = new JsonObj("name", strobj);
+
+        var actualJson = jason.serialize(obj);
+
+        var expectedJson = """
+                {
+                \t"name": "name",
+                \t"nested": {
+                \t\t"firstname": null,
+                \t\t"lastname": "maheshwari"
+                \t}
+                }
+                """;
+
+        assertEquals(expectedJson, actualJson);
+    }
 }
