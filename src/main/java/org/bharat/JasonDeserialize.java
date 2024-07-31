@@ -81,7 +81,7 @@ public class JasonDeserialize<T> {
             }
             default -> {
                 if (Character.isDigit(this.curChar)) {
-                    throw new RuntimeException("Handle number case: " + curChar);
+                    return parseNumber();
                 } else {
                     return parseNull();
                 }
@@ -113,6 +113,20 @@ public class JasonDeserialize<T> {
         }
 
         return null;
+    }
+
+    private Object parseNumber() {
+        final var startPos = this.pos;
+
+        while (Character.isDigit(this.curChar)) {
+            this.nextChar();
+        }
+
+        final var numStr = this.json.substring(startPos, this.pos);
+
+        this.nextChar(); // skip comma or newline
+
+        return Integer.parseInt(numStr);
     }
 
     private Object parseNull() {

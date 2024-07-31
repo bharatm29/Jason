@@ -1,8 +1,6 @@
 package org.bharat;
 
-import org.bharat.jsonObjs.JsonDeezArray;
-import org.bharat.jsonObjs.JsonDeezObjArray;
-import org.bharat.jsonObjs.JsonStr;
+import org.bharat.jsonObjs.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -135,6 +133,74 @@ class JasonDeserializeTest {
         final JsonStr actual = deserialize.deserialize(json, JsonStr.class);
 
         final JsonStr expected = new JsonStr(null, "Maheshwari");
+
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("Testing simple deserialization with numeric values")
+    void testingNumericJsonDeserialization() {
+        final String json = """
+                {
+                \t"name": null,
+                \t"age": 10
+                }
+                """;
+
+        JasonDeserialize<JsonNumObj> deserialize = new JasonDeserialize<>();
+
+        final JsonNumObj actual = deserialize.deserialize(json, JsonNumObj.class);
+
+        final JsonNumObj expected = new JsonNumObj(10, null);
+
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("Testing simple deserialization with numeric values")
+    void testingNumericArrayJsonDeserialization() {
+        final String json = """
+                {
+                \t"nums": [
+                \t\t1,
+                \t\t2,
+                \t\t3
+                \t]
+                }
+                """;
+
+        JasonDeserialize<JsonNumericArray> deserialize = new JasonDeserialize<>();
+
+        final JsonNumericArray actual = deserialize.deserialize(json, JsonNumericArray.class);
+
+        final JsonNumericArray expected = new JsonNumericArray(List.of(
+                1, 2, 3
+        ));
+
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("Testing deserialization with nested numeric values")
+    void testingNestedNumericJsonObjDeserialization() {
+        final String json = """
+                {
+                \t"numObjs": [
+                \t\t{
+                \t\t\t"name": null,
+                \t\t\t"age": 10
+                \t\t}
+                \t]
+                }
+                """;
+
+        JasonDeserialize<JsonNestedNumericObj> deserialize = new JasonDeserialize<>();
+
+        final JsonNestedNumericObj actual = deserialize.deserialize(json, JsonNestedNumericObj.class);
+
+        final JsonNestedNumericObj expected = new JsonNestedNumericObj(List.of(
+                new JsonNumObj(10, null)
+        ));
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
