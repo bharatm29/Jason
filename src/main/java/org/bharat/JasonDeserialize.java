@@ -93,14 +93,21 @@ public class JasonDeserialize<T> {
             // if it's a record there will only be a single all args constructor
             final var constructor = Arrays.stream(tClass.getDeclaredConstructors()).findFirst().get();
 
-            if (constructor.getParameterCount() > obj.size()) {
+            final var isStrict = false;
+
+            if (isStrict && constructor.getParameterCount() > obj.size()) {
                 throw new RuntimeException(String.format("Not enough fields to create the object. " +
                         "Number of required fields: %d, got %d%n", constructor.getParameterCount(), obj.size()));
             }
 
             final var argsList = Arrays.stream(constructor.getParameters())
                     .map(parameter -> {
-                        // FIXME: Handle if the key doesn't exist for the parameter in the map
+                        if (Boolean.FALSE.equals(obj.containsKey(parameter.getName()))) {
+                            System.out.printf("[WARN] Missing field [%s] in the given JSON string%n", parameter.getName());
+
+                            return null;
+                        }
+
                         return obj.get(parameter.getName());
                     }).toList();
             try {

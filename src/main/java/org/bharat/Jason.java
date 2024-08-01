@@ -66,11 +66,19 @@ public class Jason {
                     .findFirst();
 
             // FIXME: Provide valid errors for missing getters or misleading types
+            // TODO: Add tests for this
             if (getterOpt.isEmpty() || getterOpt.get().getReturnType() != field.getType()) {
+                System.out.printf("[WARN] Skipping serialization of field: [%s] due to:%n", fieldName);
+                if (getterOpt.isEmpty()) {
+                    System.out.printf("\t\tmissing getter%n");
+                } else {
+                    System.out.printf("\t\tInvalid getter for field: [%s]. Expected return type as [%s], got [%s]%n",
+                            fieldName, field.getType(), getterOpt.get().getReturnType());
+                }
+
                 continue;
             }
 
-            // FIXME: Handle null values for fields in every case
             try {
                 final String comma = (i + 1 == fields.length) ? "" : ",";
 
@@ -92,7 +100,7 @@ public class Jason {
                                 """;
                     }
 
-                    final String formatted = String.format(formatter, indent, fieldName, fieldVal, comma);
+                    final String formatted = formatter.formatted(indent, fieldName, fieldVal, comma);
 
                     json.append(formatted);
                 } else if (fieldVal instanceof List<?> val) {
