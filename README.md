@@ -1,4 +1,6 @@
-## Jason
+[![Java CI with Maven](https://github.com/bharatm29/Jason/actions/workflows/maven.yml/badge.svg)](https://github.com/bharatm29/Jason/actions/workflows/maven.yml)
+
+## Jason 
 JSON serializion engine written in pure JAVA.
 
 #### TODO
