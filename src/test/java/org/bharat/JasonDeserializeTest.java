@@ -1,5 +1,6 @@
 package org.bharat;
 
+import org.bharat.dummyObjs.JsonNumericDoubleArray;
 import org.bharat.jsonObjs.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -157,7 +158,7 @@ class JasonDeserializeTest {
     }
 
     @Test
-    @DisplayName("Testing simple deserialization with numeric values")
+    @DisplayName("Testing simple deserialization with numeric values(integer)")
     void testingNumericArrayJsonDeserialization() {
         final String json = """
                 {
@@ -175,6 +176,29 @@ class JasonDeserializeTest {
 
         final JsonNumericArray expected = new JsonNumericArray(List.of(
                 1, 2, 3
+        ));
+
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
+    @Test
+    @DisplayName("Testing simple deserialization with numeric values(double)")
+    void testingNumericDoubleArrayJsonDeserialization() {
+        final String json = """
+                {
+                \t"nums": [
+                \t\t1.0,
+                \t\t2.69,
+                \t\t232983.20
+                \t]
+                }
+                """;
+
+        JasonDeserialize<JsonNumericDoubleArray> deserialize = new JasonDeserialize<>();
+
+        final JsonNumericDoubleArray actual = deserialize.deserialize(json, JsonNumericDoubleArray.class);
+
+        final JsonNumericDoubleArray expected = new JsonNumericDoubleArray(List.of(
+                1.0, 2.69, 232983.20
         ));
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);

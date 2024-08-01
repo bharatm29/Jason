@@ -117,8 +117,11 @@ public class JasonDeserialize<T> {
 
     private Object parseNumber() {
         final var startPos = this.pos;
+        boolean isDecimal = false;
 
-        while (Character.isDigit(this.curChar)) {
+        while (Character.isDigit(this.curChar) || this.curChar == '.') {
+            if (this.curChar == '.') isDecimal = true;
+
             this.nextChar();
         }
 
@@ -126,7 +129,11 @@ public class JasonDeserialize<T> {
 
         this.nextChar(); // skip comma or newline
 
-        return Integer.parseInt(numStr);
+        if (isDecimal) {
+            return Double.parseDouble(numStr);
+        } else {
+            return Integer.parseInt(numStr);
+        }
     }
 
     private Object parseNull() {

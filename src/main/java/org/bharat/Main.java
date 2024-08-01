@@ -1,22 +1,27 @@
 package org.bharat;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.bharat.dummyObjs.JsonBigObj;
+import org.bharat.dummyObjs.JsonBigObjArr;
 import org.bharat.dummyObjs.JsonDummyObj;
+
+import java.io.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        InputStream in = Main.class.getResourceAsStream("/test.json");
+        InputStream in = Main.class.getResourceAsStream("/big.json");
 
         final var json = Main.readFromInputStream(in);
 
-        JasonDeserialize<JsonDummyObj> jason = new JasonDeserialize<>();
+        JasonDeserialize<JsonBigObjArr> jason = new JasonDeserialize<>();
 
-        final var deserializedObj = jason.deserialize(json, JsonDummyObj.class);
+        final var deserializedObj = jason.deserialize(json, JsonBigObjArr.class);
 
-        System.out.println(deserializedObj);
+        Jason jasonSerialize = new Jason();
+        final var serialize = jasonSerialize.serialize(deserializedObj);
+
+        try (PrintWriter writer = new PrintWriter("serialize.json")) {
+            writer.print(serialize);
+        }
     }
 
     private static String readFromInputStream(InputStream inputStream)

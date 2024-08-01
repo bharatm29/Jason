@@ -43,8 +43,8 @@ class JasonTest {
 
         final var expectedJson = """
                 {
-                \t"firstname": "bharat",
-                \t"lastname": "maheshwari"
+                  "firstname": "bharat",
+                  "lastname": "maheshwari"
                 }
                 """;
 
@@ -60,10 +60,10 @@ class JasonTest {
 
         final var expectedJson = """
                 {
-                \t"name": "bharat maheshwari",
-                \t"age": 19,
-                \t"price": 100.29,
-                \t"isValid": false
+                  "name": "bharat maheshwari",
+                  "age": 19,
+                  "price": 100.29,
+                  "isValid": false
                 }
                 """;
 
@@ -81,11 +81,11 @@ class JasonTest {
 
         final var expectedJson = """
                 {
-                \t"arr": [
-                \t\t1,
-                \t\t1.45,
-                \t\t"Name"
-                \t]
+                  "arr": [
+                    1,
+                    1.45,
+                    "Name"
+                  ]
                 }
                 """;
 
@@ -103,11 +103,11 @@ class JasonTest {
 
         final var expectedJson = """
                 {
-                \t"arr": [
-                \t\t1,
-                \t\t1.45,
-                \t\t"Name"
-                \t]
+                  "arr": [
+                    1,
+                    1.45,
+                    "Name"
+                  ]
                 }
                 """;
 
@@ -125,11 +125,11 @@ class JasonTest {
 
         var expectedJson = """
                 {
-                \t"name": "name",
-                \t"nested": {
-                \t\t"firstname": "bharat",
-                \t\t"lastname": "maheshwari"
-                \t}
+                  "name": "name",
+                  "nested": {
+                    "firstname": "bharat",
+                    "lastname": "maheshwari"
+                  }
                 }
                 """;
 
@@ -142,14 +142,14 @@ class JasonTest {
 
         expectedJson = """
                 {
-                \t"arr": [
-                \t\t"name",
-                \t\t{
-                \t\t\t"firstname": "bharat",
-                \t\t\t"lastname": "maheshwari"
-                \t\t},
-                \t\t1
-                \t]
+                  "arr": [
+                    "name",
+                    {
+                      "firstname": "bharat",
+                      "lastname": "maheshwari"
+                    },
+                    1
+                  ]
                 }
                 """;
 
@@ -165,8 +165,8 @@ class JasonTest {
 
         final var expectedJson = """
                 {
-                \t"firstname": "bharat",
-                \t"lastname": null
+                  "firstname": "bharat",
+                  "lastname": null
                 }
                 """;
 
@@ -185,11 +185,11 @@ class JasonTest {
 
         var expectedJson = """
                 {
-                \t"name": "name",
-                \t"nested": {
-                \t\t"firstname": null,
-                \t\t"lastname": "maheshwari"
-                \t}
+                  "name": "name",
+                  "nested": {
+                    "firstname": null,
+                    "lastname": "maheshwari"
+                  }
                 }
                 """;
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Jason {
     private boolean isRecord;
+    final String INDENT_TOKEN = "  ";
 
     public Jason() {
         this.isRecord = true;
@@ -30,12 +31,12 @@ public class Jason {
      * @return Serialized json
      * @since 1.0
      */
-    public String serialize(Object obj, final int depth, String optionalObjName) {
+    private String serialize(Object obj, final int depth, String optionalObjName) {
         assert optionalObjName != null;
 
         StringBuilder json = new StringBuilder();
 
-        json.append("\t".repeat(Math.max(0, depth)));
+        json.append(INDENT_TOKEN.repeat(Math.max(0, depth)));
         if (!optionalObjName.isEmpty()) {
             json.append(String.format("\"%s\": ", optionalObjName));
         }
@@ -44,7 +45,7 @@ public class Jason {
         var objClass = obj.getClass();
 
         if (this.isPrimitive(objClass)) {
-            final String indent = "\t".repeat(Math.max(0, depth));
+            final String indent = INDENT_TOKEN.repeat(Math.max(0, depth));
             final String newline = depth > 0 ? "" : "\n";
             if (obj instanceof String) {
                 return String.format("%s\"%s\"%s", indent, obj, newline);
@@ -75,13 +76,12 @@ public class Jason {
 
                 var fieldVal = getterOpt.get().invoke(obj);
 
+                final String indent = INDENT_TOKEN.repeat(Math.max(0, depth + 1));
                 if (fieldVal == null) {
-                    final String indent = "\t".repeat(Math.max(0, depth + 1));
                     json.append("""
                             %s"%s": %s%s
                             """.formatted(indent, fieldName, "null", comma));
                 } else if (isPrimitive(fieldVal.getClass())) {
-                    final String indent = "\t".repeat(Math.max(0, depth + 1));
                     String formatter = """
                             %s"%s": %s%s
                             """;
@@ -105,7 +105,7 @@ public class Jason {
             }
         }
 
-        json.append("\t".repeat(depth)).append("}");
+        json.append(INDENT_TOKEN.repeat(depth)).append("}");
         if (depth == 0) {
             json.append("\n");
         }
@@ -114,7 +114,7 @@ public class Jason {
     }
 
     private String serializedArray(final String fieldName, final List<?> fieldVal, final int depth, final String comma) {
-        final String indent = "\t".repeat(Math.max(0, depth));
+        final String indent = INDENT_TOKEN.repeat(Math.max(0, depth));
         StringBuilder json = new StringBuilder(String.format("""
                 %s"%s": [
                 """, indent, fieldName));
