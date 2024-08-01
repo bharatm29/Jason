@@ -32,6 +32,24 @@ class JasonDeserializeTest {
     }
 
     @Test
+    @DisplayName("Testing simple deserialization with class objects")
+    void testingSimpleDeserializationClassObj() {
+        final String json = """
+                {
+                \t"firstname": "Bharat",
+                }
+                """;
+
+        JasonDeserialize<JsonStrClassObj> deserialize = new JasonDeserialize<>();
+
+        final JsonStrClassObj actual = deserialize.deserialize(json, JsonStrClassObj.class);
+
+        final JsonStrClassObj expected = new JsonStrClassObj("Bharat", null);
+
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
     @DisplayName("Testing array deserialization")
     void testingArrayDeserialization() {
         final String json = """

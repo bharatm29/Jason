@@ -1,5 +1,6 @@
 package org.bharat;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
@@ -123,7 +124,44 @@ public class JasonDeserialize<T> {
                 System.out.println("Error creating new instance of record: " + e.getMessage());
             }
         } else {
-            throw new RuntimeException("Class objects not handled: " + tClass);
+            try {
+                final var constructor = tClass.getDeclaredConstructor();
+                final var instance = constructor.newInstance();
+
+                Arrays.stream(fields)
+                        .filter(field -> {
+                            if (obj.containsKey(field.getName())) {
+                                return true;
+                            }
+
+                            System.out.printf("[WARN] No field named [%s] found on provided JSON%n", field.getName());
+                            return false;
+                        })
+                        .forEach(field -> {
+                            try {
+                                final var setter = tClass.getDeclaredMethod(setterName(field.getName()), field.getType());
+
+                                setter.invoke(instance, obj.get(field.getName()));
+                            } catch (NoSuchMethodException e) {
+                                System.out.printf("ERROR no setter found for field [%s]%n", field.getName());
+                            } catch (InvocationTargetException e) {
+                                System.out.println("ERROR innovation target exception: " + e.getMessage());
+                            } catch (IllegalAccessException e) {
+                                System.out.printf("ERROR accessing the function [%s] due to: %s%n", setterName(field.getName()),e.getMessage());
+                            }
+                        });
+
+                return instance;
+            } catch (NoSuchMethodException e) {
+                System.out.printf("ERROR no default constructor found for class: [%s]%n%n", tClass);
+                return null;
+            } catch (InvocationTargetException e) {
+                System.out.printf("ERROR invoking default constructor of class: [%s] due to %s%n", tClass, e.getMessage());
+            } catch (InstantiationException e) {
+                System.out.printf("ERROR creating instance of class: [%s] due to %s%n", tClass, e.getMessage());
+            } catch (Exception e) {
+                System.out.println("ERROR with constructor: " + e.getMessage());
+            }
         }
 
         return null;
@@ -218,5 +256,10 @@ public class JasonDeserialize<T> {
         while (Character.isWhitespace(curChar)) {
             this.nextChar();
         }
+    }
+
+    private String setterName(final String fieldName) {
+        return "set" + Character.toUpperCase(fieldName.charAt(0)) +
+                fieldName.substring(1);
     }
 }
