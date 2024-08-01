@@ -83,7 +83,7 @@ class JasonDeserializeTest {
     }
 
     @Test
-    @DisplayName("Testing if non-existent fields are ignored and warns if a field is missing")
+    @DisplayName("Testing if non-existent fields are ignored and warns if a field is missing in non-strict mode")
     void testingThrowsIfFieldNonExist() {
         // missing lastname field
         final String json = """
@@ -93,7 +93,7 @@ class JasonDeserializeTest {
                 }
                 """;
 
-        JasonDeserialize<JsonStr> deserialize = new JasonDeserialize<>();
+        JasonDeserialize<JsonStr> deserialize = new JasonDeserialize<>(false);
 
         final JsonStr actual = deserialize.deserialize(json, JsonStr.class);
 

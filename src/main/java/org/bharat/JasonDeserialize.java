@@ -7,6 +7,15 @@ public class JasonDeserialize<T> {
     private char curChar;
     private int pos = 0;
     private String json;
+    private final boolean isStrict;
+
+    public JasonDeserialize() {
+        this.isStrict = true;
+    }
+
+    public JasonDeserialize(final boolean isStrict) {
+        this.isStrict = isStrict;
+    }
 
     public T deserialize(final String json, Class<T> tClass) {
         this.json = json;
@@ -92,8 +101,6 @@ public class JasonDeserialize<T> {
         if (tClass == Object.class || tClass.isRecord()) {
             // if it's a record there will only be a single all args constructor
             final var constructor = Arrays.stream(tClass.getDeclaredConstructors()).findFirst().get();
-
-            final var isStrict = false;
 
             if (isStrict && constructor.getParameterCount() > obj.size()) {
                 throw new RuntimeException(String.format("Not enough fields to create the object. " +
