@@ -18,6 +18,12 @@ public class JasonDeserialize<T> {
         this.isStrict = isStrict;
     }
 
+    /**
+     * Returns deserialized object of type {@code tClass} but returns {@code null} in case of error
+     * @param json JSON string in valid format
+     * @param tClass Type of deserialized object
+     * @return POJO made by parsing {@code json}
+     */
     public T deserialize(final String json, Class<T> tClass) {
         this.json = json;
         this.curChar = json.charAt(pos);
@@ -98,9 +104,9 @@ public class JasonDeserialize<T> {
             }
         }
 
-        // FIXME: Handle constructor for class instances
         if (tClass == Object.class || tClass.isRecord()) {
             // if it's a record there will only be a single all args constructor
+            // we don't have to check if the constructor exists since records will 100% have a all args constructor
             final var constructor = Arrays.stream(tClass.getDeclaredConstructors()).findFirst().get();
 
             if (isStrict && constructor.getParameterCount() > obj.size()) {
